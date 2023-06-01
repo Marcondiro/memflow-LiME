@@ -8,7 +8,8 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
-memflow = "0.2.0-beta10"
+memflow = "=0.2.0-beta10"
+binread = "2.2.0"
 
 [features]
 plugins = ['memflow/plugins']
