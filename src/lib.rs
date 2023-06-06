@@ -69,7 +69,7 @@ pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>>
         offset += LimeHeader::header_size_in_bytes();
         println!("{:?}", header);
 
-        map.push_remap(offset.into(), header.ram_section_size(), header.s_addr.into());
+        map.push_remap(header.s_addr.into(), header.ram_section_size(), offset.into());
         offset = lime_dump.seek(SeekFrom::Current(header.ram_section_size() as i64)).unwrap();
     }
 
