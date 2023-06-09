@@ -14,6 +14,7 @@ use std::io::{Cursor, Read, Seek, SeekFrom};
 struct LimeHeader{
     /// Header version number
     #[br(assert(version == 1, "Unsupported LiME version: {}", version))]
+    #[allow(dead_code)]
     version: u32,
     /// Starting address of physical RAM range
     s_addr: u64,
@@ -21,6 +22,7 @@ struct LimeHeader{
     #[br(assert(e_addr >= s_addr, "End address can not be lower than start address"))]
     e_addr: u64,
     /// Currently all zeros
+    #[allow(dead_code)]
     reserved: [u8; 8],
 }
 
@@ -67,7 +69,6 @@ pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>>
             Err(_) => break,
         };
         offset += LimeHeader::header_size_in_bytes();
-        println!("{:?}", header);
 
         map.push_remap(header.s_addr.into(), header.ram_section_size(), offset.into());
         offset = lime_dump.seek(SeekFrom::Current(header.ram_section_size() as i64)).unwrap();
@@ -121,6 +122,6 @@ mod tests {
     #[test]
     fn it_works() {
         let connector_args = ConnectorArgs::new(Some("deb-x86.lime"), Args::default(), None);
-        let connector = create_connector(&connector_args).unwrap();
+        let _connector = create_connector(&connector_args).unwrap();
     }
 }
