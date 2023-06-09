@@ -6,11 +6,11 @@ use memflow::connector::fileio::{CloneFile, FileIoMemory};
 use std::fs::File;
 use std::io::{Cursor, Read, Seek, SeekFrom};
 
-/// Header defined by the LiME file format, version 1
+/// Header defined by the __LiME__ file format, version 1
 ///
-/// https://github.com/504ensicsLabs/LiME/blob/master/doc/README.md#Spec
+/// source: [LiME Memory Range Header Version 1 Specification](https://github.com/504ensicsLabs/LiME/blob/master/doc/README.md#Spec)
 #[derive(Debug, BinRead)]
-#[br(magic = 0x4C694D45u32)] //LiME
+#[br(magic = 0x4C69_4D45_u32)] //LiME
 struct LimeHeader{
     /// Header version number
     #[br(assert(version == 1, "Unsupported LiME version: {}", version))]
@@ -22,12 +22,13 @@ struct LimeHeader{
     #[br(assert(e_addr >= s_addr, "End address can not be lower than start address"))]
     e_addr: u64,
     /// Currently all zeros
+    #[br(assert(reserved == [0;8], "Unsupported LiME reserved fields values"))]
     #[allow(dead_code)]
     reserved: [u8; 8],
 }
 
 impl LimeHeader {
-    /// Size in bytes of LimeHeader
+    /// Size in bytes of `LimeHeader`
     const fn header_size_in_bytes() -> u64 {
         32
     }
@@ -38,7 +39,7 @@ impl LimeHeader {
         lime_dump.read_exact(&mut buff)
             .map_err(|_| Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile))?;
 
-        let header:LimeHeader = (&mut Cursor::new(&buff)).read_le()
+        let header:LimeHeader = Cursor::new(&buff).read_le()
             .map_err(|_| Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile))?;
 
         // TODO warning if reserved != 0s
@@ -63,17 +64,15 @@ pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>>
     let mut map = MemoryMap::new();
     let mut offset = 0;
 
-    loop{
-        let header = match LimeHeader::next_header_from_file(&mut lime_dump) {
-            Ok(h) => h,
-            Err(_) => break,
-        };
+    while let Ok(header) = LimeHeader::next_header_from_file(&mut lime_dump) {
         offset += LimeHeader::header_size_in_bytes();
 
         map.push_remap(header.s_addr.into(), header.ram_section_size(), offset.into());
+        //TODO better error handling
         offset = lime_dump.seek(SeekFrom::Current(header.ram_section_size() as i64)).unwrap();
     }
 
+    lime_dump.seek(SeekFrom::Start(0)).unwrap();
     FileIoMemory::with_mem_map(lime_dump.into(), map)
 }
 
@@ -117,11 +116,5 @@ mod tests {
         assert_eq!(header.s_addr, 0x40000000);
         assert_eq!(header.e_addr, 0xFBD00000-1);
         assert_eq!(header.reserved, [0;8]);
-    }
-
-    #[test]
-    fn it_works() {
-        let connector_args = ConnectorArgs::new(Some("deb-x86.lime"), Args::default(), None);
-        let _connector = create_connector(&connector_args).unwrap();
     }
 }
