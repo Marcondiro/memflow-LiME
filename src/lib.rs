@@ -73,14 +73,7 @@ pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>>
         offset = lime_dump.seek(SeekFrom::Current(header.ram_section_size() as i64)).unwrap();
     }
 
-    println!("{:?}", map);
-
-    // mem.read(&mut head).ok();
-
-    // let mut map = MemoryMap::new();
-
-    // FileIoMemory::with_mem_map(mem.into(), map)
-    Err(Error(ErrorOrigin::Connector, ErrorKind::Unknown))
+    FileIoMemory::with_mem_map(lime_dump.into(), map)
 }
 
 pub fn help() -> String {
@@ -118,11 +111,16 @@ mod tests {
         let header = LimeHeader::next_header_from_file(&mut tmp_file).unwrap();
 
         fs::remove_file(tmp_file_path).unwrap();
+
+        assert_eq!(header.version, 1);
+        assert_eq!(header.s_addr, 0x40000000);
+        assert_eq!(header.e_addr, 0xFBD00000-1);
+        assert_eq!(header.reserved, [0;8]);
     }
 
     #[test]
     fn it_works() {
-        let connector_args = ConnectorArgs::new(Some("kali-test.lime"), Args::default(), None);
+        let connector_args = ConnectorArgs::new(Some("deb-x86.lime"), Args::default(), None);
         let connector = create_connector(&connector_args).unwrap();
     }
 }
