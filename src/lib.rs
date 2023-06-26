@@ -79,7 +79,7 @@ pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>>
             )?
             .as_ref(),
     )
-        .map_err(|_| Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile))?;
+    .map_err(|_| Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile))?;
 
     let mut map = MemoryMap::new();
     let mut offset = 0;
@@ -114,7 +114,7 @@ The `lime` connector implements the LiME file format parser.
 
 The `target` argument specifies the filename of the file to be opened.
     "
-        .to_string()
+    .to_string()
 }
 
 #[cfg(test)]
