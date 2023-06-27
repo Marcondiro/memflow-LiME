@@ -68,6 +68,16 @@ impl LimeHeader {
     }
 }
 
+/// Create connector to a `LiME` file.
+///
+/// # Arguments
+///
+/// * `args` - the target field may contain the `LiME` file path
+///
+/// # Errors
+///
+/// Returns `Err` if an error occurred while reading or parsing the file
+///
 #[connector(name = "lime", help_fn = "help")]
 pub fn create_connector(args: &ConnectorArgs) -> Result<FileIoMemory<CloneFile>> {
     let mut lime_dump = File::open(

@@ -3,9 +3,12 @@ name = "memflow-lime"
 version = "0.1.0"
 edition = "2021"
 description = "LiME files connector for memflow physical memory introspection framework"
-keywords = [ "memflow", "LiME", "memory", "linux" ]
+keywords = ["memflow", "LiME", "memory", "linux"]
 readme = "README.md"
 license = "MIT"
+
+[lib]
+crate-type = ["lib", "cdylib"]
 
 [dependencies]
 memflow = "=0.2.0-beta10"
