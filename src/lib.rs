@@ -52,7 +52,7 @@ impl LimeHeader {
             Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => Ok(None),
             Err(_) => Err(Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile)),
             Ok(()) => {
-                let header: LimeHeader = Cursor::new(&buff).read_le().map_err(|_| {
+                let header = Cursor::new(&buff).read_le().map_err(|_| {
                     Error(ErrorOrigin::Connector, ErrorKind::UnableToReadFile)
                         .log_error("Unable to parse the LiME file.")
                 })?;
@@ -63,7 +63,7 @@ impl LimeHeader {
     }
 
     /// Size in bytes of the memory represented by this header
-    fn mem_section_size(&self) -> u64 {
+    const fn mem_section_size(&self) -> u64 {
         self.e_addr - self.s_addr + 1
     }
 }
